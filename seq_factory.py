@@ -54,11 +54,20 @@ nInlet = abst.addObject(20, y0*2 + 50, 'inlet')
 abst.addConnection(nInlet, 0, nSelect, 0)
 
 # add inlet add message for setting the toggles
-nSetInlet = abst.addObject(70, y0*2 + 50, 'inlet')
-nMsg = abst.addWirelessMessage(50, y0*2 + 100,
+nSetInlet = abst.addObject(100, y0*2 + 50, 'inlet')
+nMsg = abst.addWirelessMessage(100, y0*2 + 100,
                                [('rcv_tgl_{0}'.format(n), '\\${0}'.format(n+1))
                                 for n in range(nSteps)])
 abst.addConnection(nSetInlet, 0, nMsg, 0)
+
+# add forward rotation with pack and split
+nPack = abst.addObject(150, y0*2 + 50, 'pack', ['s'] + ['0']*nSteps)
+nSplit = abst.addObject(150, y0*2 + 80, 'list split', ['1'])
+abst.addConnection(nPack, 0, nSplit, 0)
+abst.addConnection(nSplit, 1, nMsg, 0) # tail of the list
+nFwdRotBng = abst.addObject(x0*2-15, 0, 'bng', [15, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
+abst.addConnection(nFwdRotBng, 0, nPack, 0)
+
 
 # add outlet
 nOutlet = abst.addObject(x0*4, y0*2 + 100, 'outlet')
@@ -74,6 +83,8 @@ for nPoint, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fa
     nSpigot = abst.addObject(xLin, yLin0 + yLinStep * nPoint, 'spigot')
     # toggle->spigot
     abst.addConnection(nTgl, 0, nSpigot, 1)
+    # toggle->forward rotation pack
+    abst.addConnection(nTgl, 0, nPack, (nPoint+1)%nSteps + 1) # first +1 is for rotation
     # select->bng
     abst.addConnection(nSelect, nPoint, nBng, 0)
     # bng->spigot

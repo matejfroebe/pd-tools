@@ -61,12 +61,18 @@ nMsg = abst.addWirelessMessage(100, y0*2 + 100,
 abst.addConnection(nSetInlet, 0, nMsg, 0)
 
 # add forward rotation with pack and split
-nPack = abst.addObject(150, y0*2 + 50, 'pack', ['s'] + ['0']*nSteps)
+nPackFwd = abst.addObject(150, y0*2 + 50, 'pack', ['s'] + ['0']*nSteps)
 nSplit = abst.addObject(150, y0*2 + 80, 'list split', ['1'])
-abst.addConnection(nPack, 0, nSplit, 0)
+abst.addConnection(nPackFwd, 0, nSplit, 0)
 abst.addConnection(nSplit, 1, nMsg, 0) # tail of the list
 nFwdRotBng = abst.addObject(x0*2-15, 0, 'bng', [15, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
-abst.addConnection(nFwdRotBng, 0, nPack, 0)
+abst.addConnection(nFwdRotBng, 0, nPackFwd, 0)
+
+# backward rotation
+nPackBck = abst.addObject(200, y0*2 + 50, 'pack', ['s'] + ['0']*nSteps)
+abst.addConnection(nPackBck, 0, nSplit, 0)
+nBckRotBng = abst.addObject(x0*2-15-15, 0, 'bng', [15, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
+abst.addConnection(nBckRotBng, 0, nPackBck, 0)
 
 
 # add outlet
@@ -84,7 +90,9 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
     # toggle->spigot
     abst.addConnection(nTgl, 0, nSpigot, 1)
     # toggle->forward rotation pack
-    abst.addConnection(nTgl, 0, nPack, (nStep+1)%nSteps + 1) # first +1 is for rotation
+    abst.addConnection(nTgl, 0, nPackFwd, (nStep+1)%nSteps + 1) # first +1 is for rotation
+    # toggle->backward rotation pack
+    abst.addConnection(nTgl, 0, nPackBck, (nStep-1)%nSteps + 1)
     # select->bng
     abst.addConnection(nSelect, nStep, nBng, 0)
     # bng->spigot

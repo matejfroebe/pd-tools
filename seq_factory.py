@@ -19,6 +19,15 @@ class Abstraction:
         self.nObj = self.nObj + 1
         return self.nObj - 1
 
+    def addWirelessMessage(self, x, y, msgs=[]):
+        "msgs: list of tuples (address, message)"
+        self.objLines.append(
+            "#X msg {0} {1} {2};\n".format(x, y,
+                                           ' '.join('\\; {0} {1}'.format(m[0], m[1])
+                                                    for m in msgs)))
+        self.nObj = self.nObj + 1
+        return self.nObj - 1
+
     def addConnection(self, nObj1, nOut1, nObj2, nIn2):
         self.connectionLines.append("#X connect {0} {1} {2} {3};\n".format(nObj1, nOut1, nObj2, nIn2))
 
@@ -38,11 +47,18 @@ yLinStep = 60
 abst = Abstraction()
 
 # add "select" object
-nSelect = abst.addObject(20, y0*2+ 50, 'select', range(nSteps))
+nSelect = abst.addObject(20, y0*2 + 100, 'select', range(nSteps))
 
-# add inlet
-nInlet = abst.addObject(20, y0*2+ 50, 'inlet')
+# add counter inlet
+nInlet = abst.addObject(20, y0*2 + 50, 'inlet')
 abst.addConnection(nInlet, 0, nSelect, 0)
+
+# add inlet add message for setting the toggles
+nSetInlet = abst.addObject(70, y0*2 + 50, 'inlet')
+nMsg = abst.addWirelessMessage(50, y0*2 + 100,
+                               [('rcv_tgl_{0}'.format(n), '\\${0}'.format(n+1))
+                                for n in range(nSteps)])
+abst.addConnection(nSetInlet, 0, nMsg, 0)
 
 # add outlet
 nOutlet = abst.addObject(x0*4, y0*2 + 100, 'outlet')
@@ -51,7 +67,9 @@ for nPoint, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fa
     yTgl = y0 - tglSize/2 - np.cos(fi) * rTgl 
     xBng = x0 - bngSize/2 + np.sin(fi) * rBng 
     yBng = y0 - bngSize/2 - np.cos(fi) * rBng 
-    nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl', [tglSize, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -4032, -1, -1, 1, 1])
+    nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
+                          [tglSize, 0, 'empty', 'rcv_tgl_'+str(nPoint),
+                           'empty', 17, 7, 0, 10, -4032, -1, -1, 1, 1])
     nBng = abst.addObject(int(xBng), int(yBng), 'bng', [bngSize, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
     nSpigot = abst.addObject(xLin, yLin0 + yLinStep * nPoint, 'spigot')
     # toggle->spigot

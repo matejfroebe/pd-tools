@@ -10,26 +10,26 @@ args = parser.parse_args()
 
 class Abstraction:
     def __init__(self):
-        self.nObj = 0
+        self.nBox = 0
         self.objLines = []
         self.connectionLines = []
-    
+
+    def addBox(self, boxType, x, y, params):
+        self.objLines.append("#X {0} {1} {2} {3};\n".format(boxType, x, y, ' '.join(str(p) for p in params)))
+        self.nBox = self.nBox + 1
+        return self.nBox - 1
+        
     def addObject(self, x, y, name, params=[]):
-        self.objLines.append("#X obj {0} {1} {2} {3};\n".format(x, y, name, ' '.join(str(p) for p in params)))
-        self.nObj = self.nObj + 1
-        return self.nObj - 1
+        return self.addBox('obj', x, y, [name] + params)
 
     def addWirelessMessage(self, x, y, msgs=[]):
         "msgs: list of tuples (address, message)"
-        self.objLines.append(
-            "#X msg {0} {1} {2};\n".format(x, y,
-                                           ' '.join('\\; {0} {1}'.format(m[0], m[1])
-                                                    for m in msgs)))
-        self.nObj = self.nObj + 1
-        return self.nObj - 1
+        def flatten(l):
+            return [item for sublist in l for item in sublist]
+        return self.addBox('msg', x, y, flatten([('\\;', m[0], m[1]) for m in msgs]))
 
-    def addConnection(self, nObj1, nOut1, nObj2, nIn2):
-        self.connectionLines.append("#X connect {0} {1} {2} {3};\n".format(nObj1, nOut1, nObj2, nIn2))
+    def addConnection(self, nBox1, nOut1, nBox2, nIn2):
+        self.connectionLines.append("#X connect {0} {1} {2} {3};\n".format(nBox1, nOut1, nBox2, nIn2))
 
 
 nSteps = args.N
@@ -47,7 +47,7 @@ yLinStep = 60
 abst = Abstraction()
 
 # add "select" object
-nSelect = abst.addObject(20, y0*2 + 100, 'select', range(nSteps))
+nSelect = abst.addObject(20, y0*2 + 100, 'select', list(range(nSteps)))
 
 # add counter inlet
 nInlet = abst.addObject(20, y0*2 + 50, 'inlet')
@@ -71,22 +71,22 @@ abst.addConnection(nFwdRotBng, 0, nPack, 0)
 
 # add outlet
 nOutlet = abst.addObject(x0*4, y0*2 + 100, 'outlet')
-for nPoint, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=False)):
+for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=False)):
     xTgl = x0 - tglSize/2 + np.sin(fi) * rTgl 
     yTgl = y0 - tglSize/2 - np.cos(fi) * rTgl 
     xBng = x0 - bngSize/2 + np.sin(fi) * rBng 
     yBng = y0 - bngSize/2 - np.cos(fi) * rBng 
     nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
-                          [tglSize, 0, 'empty', 'rcv_tgl_'+str(nPoint),
+                          [tglSize, 0, 'empty', 'rcv_tgl_'+str(nStep),
                            'empty', 17, 7, 0, 10, -4032, -1, -1, 1, 1])
     nBng = abst.addObject(int(xBng), int(yBng), 'bng', [bngSize, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
-    nSpigot = abst.addObject(xLin, yLin0 + yLinStep * nPoint, 'spigot')
+    nSpigot = abst.addObject(xLin, yLin0 + yLinStep * nStep, 'spigot')
     # toggle->spigot
     abst.addConnection(nTgl, 0, nSpigot, 1)
     # toggle->forward rotation pack
-    abst.addConnection(nTgl, 0, nPack, (nPoint+1)%nSteps + 1) # first +1 is for rotation
+    abst.addConnection(nTgl, 0, nPack, (nStep+1)%nSteps + 1) # first +1 is for rotation
     # select->bng
-    abst.addConnection(nSelect, nPoint, nBng, 0)
+    abst.addConnection(nSelect, nStep, nBng, 0)
     # bng->spigot
     abst.addConnection(nBng, 0, nSpigot, 0)
     # spigot->outlet

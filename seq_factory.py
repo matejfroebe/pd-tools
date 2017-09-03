@@ -45,6 +45,7 @@ rTgl = 170
 rBng = 145
 
 xLin = x0 * 2 + 20
+xLinStep = 60
 yLin0 = 10
 yLinStep = 60
 
@@ -59,22 +60,20 @@ abst.addConnection(nInlet, 0, nSelect, 0)
 
 # add inlet add message for setting the toggles
 nSetInlet = abst.addObject(100, y0*2 + 50, 'inlet')
-nMsg = abst.addWirelessMessage(100, y0*2 + 100,
-                               [('rcv_tgl_{0}'.format(n), '\\${0}'.format(n+1))
-                                for n in range(nSteps)])
-abst.addConnection(nSetInlet, 0, nMsg, 0)
+nUnpack = abst.addObject(150, y0*2 + 150, 'unpack', ['s'] + ['0']*nSteps)
+
+#abst.addConnection(nSetInlet, 0, nMsg, 0)
+abst.addConnection(nSetInlet, 0, nUnpack, 0)
 
 # add forward rotation with pack and split
 nPackFwd = abst.addObject(150, y0*2 + 50, 'pack', ['s'] + ['0']*nSteps)
-nSplit = abst.addObject(150, y0*2 + 80, 'list split', ['1'])
-abst.addConnection(nPackFwd, 0, nSplit, 0)
-abst.addConnection(nSplit, 1, nMsg, 0) # tail of the list
+abst.addConnection(nPackFwd, 0, nUnpack, 0)
 nFwdRotBng = abst.addObject(x0*2-15, 0, 'bng', [15, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
 abst.addConnection(nFwdRotBng, 0, nPackFwd, 0)
 
 # backward rotation
-nPackBck = abst.addObject(200, y0*2 + 50, 'pack', ['s'] + ['0']*nSteps)
-abst.addConnection(nPackBck, 0, nSplit, 0)
+nPackBck = abst.addObject(400, y0*2 + 50, 'pack', ['s'] + ['0']*nSteps)
+abst.addConnection(nPackBck, 0, nUnpack, 0)
 nBckRotBng = abst.addObject(x0*2-15-15, 0, 'bng', [15, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
 abst.addConnection(nBckRotBng, 0, nPackBck, 0)
 
@@ -88,15 +87,16 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
     yBng = y0 - bngSize/2 - np.cos(fi) * rBng
     if args.conga:
         nTgl = abst.addObject(int(xTgl), int(yTgl), 'conga-button',
-                              ['rcv_tgl_'+str(nStep)])
+                              ['rcv_tgl_'+str(nStep)+'_$0'])
     else:
         nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
-                              [tglSize, 0, 'empty', 'rcv_tgl_'+str(nStep),
+                              [tglSize, 0, 'empty', 'rcv_tgl_'+str(nStep)+'_$0',
                                'empty', 17, 7, 0, 10, -4032, -1, -1, 1, 1])
 
     nBng = abst.addObject(int(xBng), int(yBng), 'bng', [bngSize, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
     nSpigot = abst.addObject(xLin, yLin0 + yLinStep * nStep, 'spigot')
     nFloat = abst.addObject(xLin + 100, yLin0 + yLinStep * nStep, 'float')
+    nSend = abst.addObject(xLin + xLinStep*nStep, 2*y0 + 200, 'send', ['rcv_tgl_'+str(nStep)+'_$0'])
     # toggle->spigot
     abst.addConnection(nTgl, 0, nSpigot, 1)
     # toggle->float object
@@ -107,6 +107,8 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
     abst.addConnection(nTgl, 0, nPackFwd, (nStep+1)%nSteps + 1) # first +1 is for rotation
     # toggle->backward rotation pack
     abst.addConnection(nTgl, 0, nPackBck, (nStep-1)%nSteps + 1)
+    # unpack->send
+    abst.addConnection(nUnpack, nStep+1, nSend, 0)
     # select->bng
     abst.addConnection(nSelect, nStep, nBng, 0)
     # bng->spigot

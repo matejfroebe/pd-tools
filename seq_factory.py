@@ -22,6 +22,9 @@ class Abstraction:
     def addObject(self, x, y, name, params=[]):
         return self.addBox('obj', x, y, [name] + params)
 
+    def addFloatAtom(self, x, y, width, rcvSym):
+        return self.addBox('floatatom', x, y, [width, 0, 0, 0, '-', rcvSym, '-', 'f', 10])
+    
     def addWirelessMessage(self, x, y, msgs=[]):
         "msgs: list of tuples (address, message)"
         def flatten(l):
@@ -82,9 +85,10 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
     yTgl = y0 - tglSize/2 - np.cos(fi) * rTgl 
     xBng = x0 - bngSize/2 + np.sin(fi) * rBng 
     yBng = y0 - bngSize/2 - np.cos(fi) * rBng 
-    nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
-                          [tglSize, 0, 'empty', 'rcv_tgl_'+str(nStep),
-                           'empty', 17, 7, 0, 10, -4032, -1, -1, 1, 1])
+    # nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
+    #                       [tglSize, 0, 'empty', 'rcv_tgl_'+str(nStep),
+    #                        'empty', 17, 7, 0, 10, -4032, -1, -1, 1, 1])
+    nTgl = abst.addFloatAtom(int(xTgl), int(yTgl), 3, 'rcv_tgl_'+str(nStep))
     nBng = abst.addObject(int(xBng), int(yBng), 'bng', [bngSize, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
     nSpigot = abst.addObject(xLin, yLin0 + yLinStep * nStep, 'spigot')
     # toggle->spigot

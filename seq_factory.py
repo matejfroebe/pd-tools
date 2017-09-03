@@ -6,6 +6,7 @@ import numpy as np
 parser = argparse.ArgumentParser(description='Make pure data circular sequencer abstraction.')
 parser.add_argument('filename', type=str, help='abstraction filename')
 parser.add_argument('N', type=int, help='number of steps')
+parser.add_argument('--conga', '-c', action='store_true', help='use conga buttons')
 args = parser.parse_args()
 
 class Abstraction:
@@ -84,9 +85,15 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
     xTgl = x0 - tglSize/2 + np.sin(fi) * rTgl 
     yTgl = y0 - tglSize/2 - np.cos(fi) * rTgl 
     xBng = x0 - bngSize/2 + np.sin(fi) * rBng 
-    yBng = y0 - bngSize/2 - np.cos(fi) * rBng 
-    nTgl = abst.addObject(int(xTgl), int(yTgl), 'conga-button',
-                          ['rcv_tgl_'+str(nStep)])
+    yBng = y0 - bngSize/2 - np.cos(fi) * rBng
+    if args.conga:
+        nTgl = abst.addObject(int(xTgl), int(yTgl), 'conga-button',
+                              ['rcv_tgl_'+str(nStep)])
+    else:
+        nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
+                              [tglSize, 0, 'empty', 'rcv_tgl_'+str(nStep),
+                               'empty', 17, 7, 0, 10, -4032, -1, -1, 1, 1])
+
     nBng = abst.addObject(int(xBng), int(yBng), 'bng', [bngSize, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
     nSpigot = abst.addObject(xLin, yLin0 + yLinStep * nStep, 'spigot')
     nFloat = abst.addObject(xLin + 100, yLin0 + yLinStep * nStep, 'float')

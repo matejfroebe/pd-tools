@@ -91,8 +91,13 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
     nTgl = abst.addFloatAtom(int(xTgl), int(yTgl), 3, 'rcv_tgl_'+str(nStep))
     nBng = abst.addObject(int(xBng), int(yBng), 'bng', [bngSize, 250, 50, 0, 'empty', 'empty', 'empty', 17, 7, 0, 10, -262144, -1, -1])
     nSpigot = abst.addObject(xLin, yLin0 + yLinStep * nStep, 'spigot')
+    nFloat = abst.addObject(xLin + 100, yLin0 + yLinStep * nStep, 'float')
     # toggle->spigot
     abst.addConnection(nTgl, 0, nSpigot, 1)
+    # toggle->float object
+    abst.addConnection(nTgl, 0, nFloat, 1)
+    # spigot->float object
+    abst.addConnection(nSpigot, 0, nFloat, 0)
     # toggle->forward rotation pack
     abst.addConnection(nTgl, 0, nPackFwd, (nStep+1)%nSteps + 1) # first +1 is for rotation
     # toggle->backward rotation pack
@@ -101,8 +106,8 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
     abst.addConnection(nSelect, nStep, nBng, 0)
     # bng->spigot
     abst.addConnection(nBng, 0, nSpigot, 0)
-    # spigot->outlet
-    abst.addConnection(nSpigot, 0, nOutlet, 0)
+    # float->outlet
+    abst.addConnection(nFloat, 0, nOutlet, 0)
 
 
 with open(args.filename, 'w') as f:

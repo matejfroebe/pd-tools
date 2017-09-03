@@ -58,12 +58,17 @@ nSelect = abst.addObject(20, y0*2 + 100, 'select', list(range(nSteps)))
 nInlet = abst.addObject(20, y0*2 + 50, 'inlet')
 abst.addConnection(nInlet, 0, nSelect, 0)
 
-# add inlet add message for setting the toggles
+# add inlet for setting the toggles
 nSetInlet = abst.addObject(100, y0*2 + 50, 'inlet')
+nListPrepend = abst.addObject(100, y0*2 + 70, 'list', ['prepend'])
 nUnpack = abst.addObject(150, y0*2 + 150, 'unpack', ['s'] + ['0']*nSteps)
-
-#abst.addConnection(nSetInlet, 0, nMsg, 0)
-abst.addConnection(nSetInlet, 0, nUnpack, 0)
+abst.addConnection(nListPrepend, 0, nUnpack, 0)
+# prepend a dummy element to the list
+nLoadBang = abst.addObject(150, y0*2 + 30, 'loadbang')
+nDummyList = abst.addBox('msg', 150, y0*2+50, ['dummy'])
+abst.addConnection(nSetInlet, 0, nListPrepend, 0)
+abst.addConnection(nLoadBang, 0, nDummyList, 0)
+abst.addConnection(nDummyList, 0, nListPrepend, 1)
 
 # add forward rotation with pack and split
 nPackFwd = abst.addObject(150, y0*2 + 50, 'pack', ['s'] + ['0']*nSteps)

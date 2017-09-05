@@ -6,6 +6,7 @@ import numpy as np
 parser = argparse.ArgumentParser(description='Make pure data circular sequencer abstraction.')
 parser.add_argument('filename', type=str, help='abstraction filename')
 parser.add_argument('N', type=int, help='number of steps')
+parser.add_argument('nStates', type=int, help='number of states for each step')
 parser.add_argument('--conga', '-c', action='store_true', help='use conga buttons')
 args = parser.parse_args()
 
@@ -92,7 +93,8 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
     yBng = y0 - bngSize/2 - np.cos(fi) * rBng
     if args.conga:
         nTgl = abst.addObject(int(xTgl), int(yTgl), 'conga-button',
-                              ['rcv_tgl_'+str(nStep)+'_$0'])
+                              [args.nStates,
+                               'rcv_tgl_'+str(nStep)+'_$0'])
     else:
         nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
                               [tglSize, 0, 'empty', 'rcv_tgl_'+str(nStep)+'_$0',

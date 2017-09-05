@@ -8,6 +8,7 @@ parser.add_argument('filename', type=str, help='abstraction filename')
 parser.add_argument('N', type=int, help='number of steps')
 parser.add_argument('nStates', type=int, help='number of states for each step')
 parser.add_argument('--conga', '-c', action='store_true', help='use conga buttons')
+parser.add_argument('--bell', '-b', action='store_true', help='use cowbell buttons')
 args = parser.parse_args()
 
 class Abstraction:
@@ -95,6 +96,9 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
         nTgl = abst.addObject(int(xTgl), int(yTgl), 'conga-button',
                               [args.nStates,
                                'rcv_tgl_'+str(nStep)+'_$0'])
+    elif args.bell:
+        nTgl = abst.addObject(int(xTgl), int(yTgl), 'cowbell-button',
+                              ['rcv_tgl_'+str(nStep)+'_$0'])
     else:
         nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
                               [tglSize, 0, 'empty', 'rcv_tgl_'+str(nStep)+'_$0',

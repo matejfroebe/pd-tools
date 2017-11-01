@@ -1,0 +1,37 @@
+#N canvas 127 31 979 712 10;
+#X obj 712 245 textfile;
+#X msg 480 217 read tempfile.txt cr \, rewind \, bang;
+#X obj 227 0 bng 15 250 50 0 empty empty Read 17 7 0 10 -262144 -1
+-1;
+#X msg 492 143 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0;
+#X obj 178 0 bng 15 250 50 0 empty empty Clear 17 7 0 10 -262144 -1
+-1;
+#X obj 89 481 spigot;
+#X obj 384 0 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1 1
+;
+#X obj 570 339 inlet;
+#X obj 184 583 outlet;
+#X obj 0 15 circle_seq\$1_\$2;
+#X obj 496 491 list split;
+#X msg 478 438 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0;
+#X obj 726 417 random 8;
+#X obj 320 0 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X text 522 23 Needs abstraction named circle_seq\$1_\$2 The abstraction
+can be generated with seq_factory.py;
+#X connect 0 0 9 1;
+#X connect 1 0 0 0;
+#X connect 2 0 1 0;
+#X connect 3 0 9 1;
+#X connect 4 0 3 0;
+#X connect 5 0 8 0;
+#X connect 6 0 5 1;
+#X connect 7 0 9 0;
+#X connect 9 0 5 0;
+#X connect 10 1 9 1;
+#X connect 11 0 10 0;
+#X connect 12 0 10 1;
+#X connect 13 0 12 0;
+#X connect 13 0 11 0;
+#X coords 0 -1 1 1 400 415 1 0 0;

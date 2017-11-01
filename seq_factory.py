@@ -9,7 +9,8 @@ parser.add_argument('N', type=int, help='number of steps')
 parser.add_argument('nStates', type=int, help='number of states for each step')
 parser.add_argument('--conga', '-c', action='store_true', help='use conga buttons')
 parser.add_argument('--bell', '-b', action='store_true', help='use cowbell buttons')
-parser.add_argument('--agogo', '-a', action='store_true', help='use cowbell buttons')
+parser.add_argument('--agogo', '-a', action='store_true', help='use agogo buttons')
+parser.add_argument('--bassnare', '-s', action='store_true', help='use bass-snare buttons')
 args = parser.parse_args()
 
 class Abstraction:
@@ -102,6 +103,9 @@ for nStep, fi in zip(range(nSteps), np.linspace(0, 2*np.pi, nSteps, endpoint=Fal
                               ['rcv_tgl_'+str(nStep)+'_$0'])
     elif args.agogo:
         nTgl = abst.addObject(int(xTgl), int(yTgl), 'agogo-button',
+                              ['rcv_tgl_'+str(nStep)+'_$0'])
+    elif args.bassnare:
+        nTgl = abst.addObject(int(xTgl), int(yTgl), 'bas-snare-button',
                               ['rcv_tgl_'+str(nStep)+'_$0'])
     else:
         nTgl = abst.addObject(int(xTgl), int(yTgl), 'tgl',
